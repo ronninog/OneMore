@@ -10,40 +10,119 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
- 
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
+
 
 export default function PerfilScreen({ navigation }) {
 
- const [nombre, setNombre] = useState('');
- const [profesion, setProfesion] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [profesion, setProfesion] = useState('');
+  const [fotoPerfil, setFotoPerfil] = useState(null);
 
 
 
-
- useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
-    const cargarNombre = async () => {
-      try {
-        const valor = await AsyncStorage.getItem('perfilUsuario');
-        if (valor !== null) {
-        const perfil =  JSON.parse(valor)
-        setNombre(perfil.nombre + perfil.apellidos)
-        setProfesion(perfil.profesion)
+      const cargarNombre = async () => {
+        try {
+          const valor = await AsyncStorage.getItem('perfilUsuario');
+          if (valor !== null) {
+            const perfil = JSON.parse(valor)
+            setNombre(perfil.nombre + perfil.apellidos)
+            setProfesion(perfil.profesion)
+          }
+        } catch (e) {
+          console.log('Error leyendo nombre:', e);
         }
-      } catch (e) {
-        console.log('Error leyendo nombre:', e);
-      }
-    };
+      };
 
-    cargarNombre();
-  }, [])
+      cargarNombre();
+    }, [])
   );
 
 
 
-  
+useEffect(() => {
+
+  const cargarFotoPerfil = async () => {
+    try {
+      const valor = await AsyncStorage.getItem('fotoPerfil');
+      if (valor) {
+        setFotoPerfil(valor);
+      }
+    } catch (e) {
+      console.log('Error cargando foto de perfil:', e);
+    }
+  };
+
+  cargarFotoPerfil();
+}, []);
+
+const seleccionarFotoPerfil = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Permiso denegado', 'Necesitamos acceso a la galería para cambiar la foto.');
+    return;
+  }
+
+  const resultado = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images, // TODO: cambiar a MediaType.Images cuando esté estable
+    allowsEditing: true,
+    quality: 0.1, // Puedes ir ajustando: prueba con 1, 0.5, 0.1, etc.
+  });
+
+  if (!resultado.canceled && resultado.assets.length > 0) {
+    const uri = resultado.assets[0].uri;
+
+    // 🧪 Comprobar el tamaño del archivo en bytes
+    try {
+      const info = await FileSystem.getInfoAsync(uri);
+      console.log(`📦 Tamaño de la imagen: ${info.size} bytes`);
+    } catch (error) {
+      console.log('Error al obtener tamaño del archivo:', error);
+    }
+
+    setFotoPerfil(uri);
+    await AsyncStorage.setItem('fotoPerfil', uri);
+  }
+};
+
+
+const getImageSize = async (uri) => {
+  const info = await FileSystem.getInfoAsync(uri);
+  console.log(`Tamaño: ${info.size} bytes`);
+};
+
+
+const seleccionarYComprimirImagen = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    quality: 1, // calidad máxima al seleccionar
+  });
+
+  if (!result.canceled) {
+    const imagenOriginal = result.assets[0];
+
+    // Comprimir la imagen
+    const imagenReducida = await ImageManipulator.manipulateAsync(
+      imagenOriginal.uri,
+      [{ resize: { width: 800 } }], // Cambia a 600, 400, etc. según lo que quieras
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // 0.7 = 70% calidad
+    );
+
+    console.log('Imagen comprimida lista para subir:', imagenReducida.uri);
+
+    // Ahora puedes subir `imagenReducida.uri` a Supabase Storage
+  }
+};
+
+
+
 
 
   return (
@@ -51,14 +130,18 @@ export default function PerfilScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Botón editar */}
         <TouchableOpacity style={styles.editar_button_style}>
-          <Ionicons name="settings-outline" size={24} color="#FF5733"  padding="5" />
+          <Ionicons name="settings-outline" size={24} color="#FF5733" padding="5" />
         </TouchableOpacity>
 
         {/* Foto y nombre */}
         <View style={styles.profileHeader}>
-          <TouchableOpacity style={styles.fotoContainer}>
+          <TouchableOpacity style={styles.fotoContainer}  onPress={seleccionarFotoPerfil}>
             <Image
-              source={require('../assets/camarera_perfil.jpg')}
+              source={
+                fotoPerfil
+                  ? { uri: fotoPerfil }
+                  : require('../assets/camarera_perfil.jpg')
+              }
               style={styles.imagen}
             />
           </TouchableOpacity>
@@ -98,7 +181,7 @@ export default function PerfilScreen({ navigation }) {
 
           <TouchableOpacity style={styles.internalCard} onPress={() => navigation.navigate('TrabajosRealizados')}>
             <Ionicons name="briefcase-outline" size={24} color="#FF5733" />
-             <View style={styles.notificacion}>
+            <View style={styles.notificacion}>
               <Text style={styles.numeroNotificacion}>5</Text>
             </View>
             <Text style={styles.cardLabel}>Trabajos</Text>
@@ -188,10 +271,10 @@ export default function PerfilScreen({ navigation }) {
 
 
 
-            <View style={styles.verticalRow}>
+        <View style={styles.verticalRow}>
 
 
-            </View>
+        </View>
 
 
 
@@ -224,7 +307,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 5,
     borderRadius: 20,
-    
+
   },
   editar_text_style: {
     color: '#FF5733',
@@ -332,7 +415,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   numeroNotificacion: {
-    color: '#fff',    
+    color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -519,6 +602,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  
+
 
 });

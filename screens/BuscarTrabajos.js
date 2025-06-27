@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 
 export default function BuscarTrabajos({ navigation }) {
- const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState('');
   const [filtroActivo, setFiltroActivo] = useState('todos');
 
   const trabajosDisponibles = [
@@ -67,13 +67,21 @@ export default function BuscarTrabajos({ navigation }) {
   ];
 
   const renderTrabajo = ({ item }) => (
-    <TouchableOpacity style={styles.trabajoDisponibleCard}>
+    
+    <TouchableOpacity
+      style={styles.trabajoDisponibleCard}
+      onPress={() => {
+        // Aquí va lo que quieras que ocurra al tocar
+        console.log('Trabajo disponible presionado');
+        navigation.navigate('OfertaTrabajo'); // si estás usando React Navigation
+      }}
+    >
       {item.urgente && (
         <View style={styles.urgenteTag}>
           <Text style={styles.urgenteTexto}>URGENTE</Text>
         </View>
       )}
-      
+
       <View style={styles.trabajoHeader}>
         <View style={styles.iconBackground}>
           <Ionicons name={item.icono} size={24} color="#FF5733" />
@@ -111,10 +119,10 @@ export default function BuscarTrabajos({ navigation }) {
       style={[styles.filtroChip, filtroActivo === item.id && styles.filtroChipActivo]}
       onPress={() => setFiltroActivo(item.id)}
     >
-      <Ionicons 
-        name={item.icono} 
-        size={16} 
-        color={filtroActivo === item.id ? '#fff' : '#FF5733'} 
+      <Ionicons
+        name={item.icono}
+        size={16}
+        color={filtroActivo === item.id ? '#fff' : '#FF5733'}
       />
       <Text style={[styles.filtroTexto, filtroActivo === item.id && styles.filtroTextoActivo]}>
         {item.nombre}
@@ -175,13 +183,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  scrollContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingBottom: 40,
-  },
 
-  // Header común
+  // Header mejorado
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -189,300 +192,223 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
   },
 
-  // Estilos del perfil
-  editar_button_style: {
+  // Barra de búsqueda mejorada
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     backgroundColor: '#fff',
-    padding: 8,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
     borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  profileHeader: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  fotoContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
-    marginBottom: 15,
-  },
-  imagen: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    resizeMode: 'cover',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-  },
-  subtitule: {
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
     fontSize: 16,
-    color: '#979797',
-    marginTop: 5,
-  },
-  starts: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  score: {
     color: '#333',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  val: {
-    color: '#979797',
-    fontSize: 14,
-    marginLeft: 5,
   },
 
-  // Fila de navegación
-  row: {
+  // Filtros mejorados
+  filtrosList: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+  },
+  filtroChip: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '90%',
-    marginBottom: 25,
-  },
-  internalCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '30%',
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
-    position: 'relative',
-  },
-  cardLabel: {
-    color: '#666',
-    marginTop: 10,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  notificacion: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#FF5733',
-    borderRadius: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minWidth: 20,
-    alignItems: 'center',
-  },
-  numeroNotificacion: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-
-  // Card de estadísticas
-  card: {
-    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
-    width: '90%',
-    paddingVertical: 20,
-    marginBottom: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  estadisticasRow: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scoreStadisticas: {
-    color: '#FF5733',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  valoresEstadisticas: {
-    color: '#666',
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-  verticalLine: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#e0e0e0',
-  },
-
-  // Botón principal
-  touchableCard: {
-    backgroundColor: '#FF5733',
-    borderRadius: 16,
-    width: '90%',
-    height: 60,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    shadowColor: '#FF5733',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-    marginBottom: 30,
-  },
-  touchableCardTitules: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    flex: 1,
-    marginLeft: 15,
-  },
-
-  // Título sección
-  tituloTrbRec: {
-    alignSelf: 'flex-start',
-    marginLeft: '5%',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
-  },
-
-  // Cards de trabajos recientes
-  touchableCardRecent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '90%',
-    padding: 20,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  iconoRecent: {
-    marginRight: 15,
-  },
-  iconBackground: {
-    backgroundColor: '#ffe3dd',
-    borderRadius: 12,
-    padding: 12,
-  },
-  rowRecent: {
-    flex: 1,
-  },
-  tituloTrabajoReciente: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  fechaReciente: {
-    color: '#979797',
-    fontSize: 13,
-    marginBottom: 8,
-  },
-  eurosReciente: {
-    color: '#FF5733',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  rightSection: {
-    alignItems: 'flex-end',
-  },
-  completadoReciente: {
-    color: '#28a745',
-    fontSize: 12,
-    fontWeight: 'bold',
-    backgroundColor: '#d4edda',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  // ESTILOS MENSAJES
-  mensajesList: {
-    padding: 20,
-  },
-  mensajeCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#FF5733',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  filtroChipActivo: {
+    backgroundColor: '#FF5733',
+    borderColor: '#FF5733',
+    shadowColor: '#FF5733',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
   },
-  mensajeNoLeido: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF5733',
+  filtroTexto: {
+    padding:10,
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FF5733',
+    
   },
-  avatarContainer: {
-    marginRight: 15,
+  filtroTextoActivo: {
+    color: '#fff',
   },
-  mensajeContent: {
-    flex: 1,
+
+  // Cards de trabajo mejorados
+  trabajosDisponiblesList: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
-  mensajeHeader: {
+  trabajoDisponibleCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    position: 'relative',
+  },
+  urgenteTag: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    backgroundColor: '#FF5733',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: '#FF5733',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  urgenteTexto: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  // Header del trabajo
+  trabajoHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    marginBottom: 15,
   },
-  nombreEmpresa: {
-    fontSize: 16,
+  iconBackground: {
+    backgroundColor: '#ffe3dd',
+    borderRadius: 16,
+    padding: 12,
+    marginRight: 15,
+    shadowColor: '#FF5733',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  trabajoInfoBuscar: {
+    flex: 1,
+    paddingRight: 40,
+  },
+  tituloTrabajo: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 5,
+    lineHeight: 22,
   },
-  tiempoMensaje: {
-    fontSize: 12,
+  empresaTrabajo: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  trabajoMetadata: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ubicacionTrabajo: {
+    fontSize: 14,
     color: '#979797',
+    marginLeft: 4,
   },
-  textoMensaje: {
+  separador: {
+    color: '#979797',
+    marginHorizontal: 8,
+    fontSize: 14,
+  },
+  tipoTrabajo: {
+    fontSize: 14,
+    color: '#FF5733',
+    fontWeight: '600',
+  },
+
+  // Descripción
+  descripcionTrabajo: {
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+    marginBottom: 15,
   },
-  puntoNoLeido: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+
+  // Footer del trabajo
+  trabajoFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  salarioTrabajo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF5733',
+  },
+  fechaTrabajo: {
+    fontSize: 14,
+    color: '#979797',
+    fontWeight: '500',
+  },
+
+  // Botón aplicar mejorado
+  aplicarButton: {
     backgroundColor: '#FF5733',
-    marginLeft: 10,
-  },});
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    shadowColor: '#FF5733',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  aplicarTexto: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+});

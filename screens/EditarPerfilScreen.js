@@ -6,63 +6,70 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
+import * as Sharing from 'expo-sharing';
 
-export default function EditarPerfilScreen({navigation}) {
+export default function EditarPerfilScreen({ navigation }) {
     const [nombre, setNombre] = useState('');
     const [apellidos, setApellidos] = useState('');
     const [observaciones, setObservaciones] = useState('');
     const [correo, setCorreo] = useState('');
     const [telefono, setTelefono] = useState('');
+    const [distMax, setDistMax] = useState('');
     const [profesion, setProfesion] = useState('');
     const [curriculum, setCurriculum] = useState(null);
 
     // Función para seleccionar PDF y guardar inmediatamente el URI y nombre
-const seleccionarPDF = async () => {
-    try {
-        const resultado = await DocumentPicker.getDocumentAsync({
-            type: 'application/pdf',
-            copyToCacheDirectory: true,
-            multiple: false,
-        });
+    const seleccionarPDF = async () => {
+        try {
+            const resultado = await DocumentPicker.getDocumentAsync({
+                type: 'application/pdf',
+                copyToCacheDirectory: true,
+                multiple: false,
+            });
 
-        console.log('Resultado DocumentPicker:', resultado);
+            console.log('Resultado DocumentPicker:', resultado);
 
-        if (!resultado.canceled && resultado.assets && resultado.assets.length > 0) {
-            const archivo = resultado.assets[0];
+            if (!resultado.canceled && resultado.assets && resultado.assets.length > 0) {
+                const archivo = resultado.assets[0];
 
-            const nuevoCurriculum = {
-                uri: archivo.uri,
-                name: archivo.name || archivo.uri.split('/').pop()
-            };
+                const nuevoCurriculum = {
+                    uri: archivo.uri,
+                    name: archivo.name || archivo.uri.split('/').pop()
+                };
 
-            setCurriculum(nuevoCurriculum);
+                setCurriculum(nuevoCurriculum);
 
-            const datosGuardados = await AsyncStorage.getItem('perfilUsuario');
-            const perfilAnterior = datosGuardados ? JSON.parse(datosGuardados) : {};
+                const datosGuardados = await AsyncStorage.getItem('perfilUsuario');
+                const perfilAnterior = datosGuardados ? JSON.parse(datosGuardados) : {};
 
-            const nuevoPerfil = {
-                ...perfilAnterior,
-                curriculumUri: nuevoCurriculum.uri,
-                curriculumName: nuevoCurriculum.name
-            };
+                const nuevoPerfil = {
+                    ...perfilAnterior,
+                    curriculumUri: nuevoCurriculum.uri,
+                    curriculumName: nuevoCurriculum.name
+                };
 
-            await AsyncStorage.setItem('perfilUsuario', JSON.stringify(nuevoPerfil));
-            Alert.alert('Currículum seleccionado', nuevoCurriculum.name);
-        } else {
-            Alert.alert('Cancelado', 'No se seleccionó ningún archivo.');
+                await AsyncStorage.setItem('perfilUsuario', JSON.stringify(nuevoPerfil));
+                Alert.alert('Currículum seleccionado', nuevoCurriculum.name);
+            } else {
+                Alert.alert('Cancelado', 'No se seleccionó ningún archivo.');
+            }
+        } catch (error) {
+            console.error('Error seleccionando el PDF:', error);
+            Alert.alert('Error', 'No se pudo seleccionar el currículum.');
         }
-    } catch (error) {
-        console.error('Error seleccionando el PDF:', error);
-        Alert.alert('Error', 'No se pudo seleccionar el currículum.');
-    }
-};
+    };
 
 
 
     // Abrir el PDF usando el navegador interno
     const abrirCurriculum = async () => {
         if (curriculum?.uri) {
-            await WebBrowser.openBrowserAsync(curriculum.uri);
+            const isAvailable = await Sharing.isAvailableAsync();
+            if (isAvailable) {
+                await Sharing.shareAsync(curriculum.uri);
+            } else {
+                Alert.alert('No disponible', 'Tu dispositivo no puede abrir este archivo directamente.');
+            }
         } else {
             Alert.alert('Currículum no disponible', 'No has subido un currículum aún.');
         }
@@ -92,7 +99,7 @@ const seleccionarPDF = async () => {
             console.error(error);
             Alert.alert('Error', 'No se pudo guardar el perfil');
         }
-        
+
     };
 
     // Cargar datos guardados al montar el componente
@@ -126,6 +133,12 @@ const seleccionarPDF = async () => {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <SafeAreaView style={styles.container}>
+
+                
+                <TouchableOpacity style={styles.goBack} onPress={navigation.goBack}>
+                   <Ionicons name="arrow-back" size={24} color="#FF5733" />
+                </TouchableOpacity>
+
                 <Text style={styles.title}>Editar Perfil</Text>
 
                 <TextInput
@@ -159,6 +172,13 @@ const seleccionarPDF = async () => {
                     style={styles.input}
                     value={profesion}
                     onChangeText={setProfesion}
+                />
+                  <TextInput
+                    placeholder="Desplazamiento máximo"
+                    style={styles.input}
+                    value={telefono}
+                    onChangeText={setDistMax}
+                    keyboardType="phone-pad"
                 />
 
                 {curriculum ? (
@@ -199,16 +219,11 @@ const seleccionarPDF = async () => {
                     <Text style={styles.saveButtonText}>Guardar cambios</Text>
                 </TouchableOpacity>
 
+
+            
+
                 {/* Botón opcional para ver datos guardados */}
-                <TouchableOpacity
-                    style={[styles.saveButton, { backgroundColor: '#6c757d', marginTop: 20 }]}
-                    onPress={async () => {
-                        const data = await AsyncStorage.getItem('perfilUsuario');
-                        Alert.alert('🧪 Datos guardados', data || 'No hay datos');
-                    }}
-                >
-                    <Text style={styles.saveButtonText}>🧪 Ver perfil guardado</Text>
-                </TouchableOpacity>
+
             </SafeAreaView>
         </TouchableWithoutFeedback>
     );
@@ -277,5 +292,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    goBack:{
+        alignItems: 'flex-start',
+        marginLeft: 10,
+        
     },
 });

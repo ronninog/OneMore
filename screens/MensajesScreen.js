@@ -40,7 +40,11 @@ export default function MensajesScreen({ navigation }) {
   ];
 
   const renderMensaje = ({ item }) => (
-    <TouchableOpacity style={[styles.mensajeCard, !item.leido && styles.mensajeNoLeido]}>
+   <TouchableOpacity
+  style={[styles.mensajeCard, !item.leido && styles.mensajeNoLeido]}
+  onPress={() => navigation.navigate('ChatScreen', { nombre: item.nombre })}>
+
+
       <View style={styles.avatarContainer}>
         <View style={styles.iconBackground}>
           <Ionicons name={item.avatar} size={24} color="#FF5733" />

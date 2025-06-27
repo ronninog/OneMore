@@ -4,12 +4,38 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { TextInput } from 'react-native-paper';
 import React, { useState, useEffect } from 'react';
 
+  
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_KEY } from '@env';
+import { supabase } from '../services/Supabase';
+
+
+
 
 
 export default function LoginScreen({ navigation }) {
 
   const [text, setText] = React.useState('');
   const [password, setPassword] = React.useState('');
+
+
+  const handleLogin = async () => {
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email: text,
+    password: password,
+  });
+
+  if (error) {
+    console.error('Error al iniciar sesión:', error.message);
+    console.log(text,password)
+    alert('Correo o contraseña incorrectos');
+  } else {
+    console.log('Usuario autenticado:', data);
+    navigation.replace('PerfilScreen');
+
+  }
+};
+
 
   return (
 
@@ -22,6 +48,8 @@ export default function LoginScreen({ navigation }) {
      <TextInput
       mode="outlined"
       label="Email"
+      value={text}
+      onChangeText={setText}
       style={{ borderRadius: 20, backgroundColor: 'white', marginHorizontal: '15%', marginTop: '80%' }}
       theme={{ roundness: 20 }} // Esto aplica borderRadius para react-native-paper
       />
@@ -29,6 +57,8 @@ export default function LoginScreen({ navigation }) {
          <TextInput
       mode="outlined"
       label="Contraseña"
+      value={password}
+      onChangeText={setPassword}
       secureTextEntry={true}
       style={{ borderRadius: 20, backgroundColor: 'white', marginHorizontal: '15%', marginTop: '5%' }}
       theme={{ roundness: 20 }} // Esto aplica borderRadius para react-native-paper
@@ -36,19 +66,19 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.bloqueBotones}> 
       
-      <TouchableOpacity style={styles.button0} onPress={() => console.log('Recuperar contraseña')}>
+      <TouchableOpacity style={styles.button0} onPress={() => navigation.navigate('RecuperarContraseñaScreen')}>
         <View>
           <Text style ={styles.recContraseña}>Recuperar contraseña</Text>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity  style={styles.button1} onPress={() => navigation.navigate('PerfilScreen')} >
+      <TouchableOpacity  style={styles.button1} onPress={handleLogin} >
         <View>
           <Text>Iniciar Sesión</Text>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button2} onPress={() => console.log('Registrarse')}>
+      <TouchableOpacity style={styles.button2} onPress={() => navigation.navigate('RegisterScreen')}>
         <View>
           <Text>Registrarse</Text>
         </View>
